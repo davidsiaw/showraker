@@ -1,0 +1,485 @@
+require 'net/http'
+require 'json'
+
+raw_page 'hi' do
+
+  html do
+    head do
+       link rel:"stylesheet", href:"https://fonts.googleapis.com/css?family=Play"
+
+       style do
+
+         text <<~TEXT
+           body { background: #002; color: #fff; margin:0px; }
+
+           .status_text {
+             color: #fff;
+             font-size: 40px;
+             font-family: 'Play';
+           }
+
+           .title_text {
+             font-size: 15px;
+             font-family: 'Play';
+           }
+
+           .layer_text_style {
+             font-size: 30px;
+             font-family: 'Play';
+           }
+
+           .stat_box {
+             position: absolute;
+             overflow: hidden;
+             background-color: rgba(0,0,0,0.8) ;
+             text-align: center;
+           }
+
+           #toolhead_box {
+             left: 20px;
+             top: 600px;
+             width: 200px;
+             height: 70px;
+             border-top: gold 5px solid;
+           }
+
+           #bed_box {
+             left: 230px;
+             top: 600px;
+             width: 200px;
+             height: 70px;
+             border-top: gray 5px solid;
+           }
+
+           #ebb_box {
+             left: 440px;
+             top: 600px;
+             width: 200px;
+             height: 70px;
+             border-top: green 5px solid;
+           }
+
+           #air_box {
+             left: 650px;
+             top: 600px;
+             width: 200px;
+             height: 70px;
+             border-top: darkred 5px solid;
+           }
+
+           #xgt_box {
+             left: 860px;
+             top: 600px;
+             width: 200px;
+             height: 70px;
+             border-top: darkcyan 5px solid;
+           }
+
+           #fan_box {
+             left: 1070px;
+             top: 600px;
+             width: 200px;
+             height: 70px;
+             border-top: purple 5px solid;
+           }
+
+           #layer_text {
+             position: absolute;
+             left: 20px;
+             top: 555px;
+             width: 405px;
+             height: 40px;
+             background-color: rgba(0,0,0,0.5);
+             padding-left: 5px;
+           }
+
+           #progress_bg {
+             position: absolute;
+             left: 20px;
+             top: 680px;
+             width: 1246px;
+             height: 30px;
+             border: #fff 2px solid;
+             background-color: rgba(0,0,0,0.8);
+             z-index: 0;
+           }
+
+           #progress_fg {
+             position: absolute;
+             left: 20px;
+             top: 680px;
+             width: 0px;
+             height: 30px;
+             border: rgba(0,0,0,0) 2px solid;
+             background-color: rgba(128,128,128,0.8);
+             z-index: 1;
+           }
+
+           #progress_text {
+             position: absolute;
+             left: 20px;
+             top: 680px;
+             width: 1246px;
+             height: 30px;
+             color: #fff;
+             font-size: 25px;
+             font-family: 'Play';
+             text-align: center;
+             z-index: 2;
+             text-shadow:2px 2px 0px #000;
+           }
+
+           #cam {
+             position: absolute;
+             left: 0px;
+             top: 0px;
+             width:1280px;
+             height:720px;
+             overflow: hidden;
+           }
+
+           #cam2 {
+             position: absolute;
+             left: 0px;
+             top: 0px;
+             width:1280px;
+             height:720px;
+             overflow: hidden;
+            /*-moz-transform: scale(-1, -1);*/
+            /*-o-transform: scale(-1, -1);*/
+            /*-webkit-transform: scale(-1, -1);*/
+            /*transform: scale(-1, -1);*/
+            display: none;
+           }
+
+           #camframe {
+             position: absolute;
+             left: 0px;
+             top: 0px;
+             width:1280px;
+             height:720px;
+             overflow: hidden;
+             border: 0px;
+           }
+
+           #cam2frame {
+             position: absolute;
+             left: 0px;
+             top: 0px;
+             width:1280px;
+             height:720px;
+             overflow: hidden;
+             border: 0px;
+           }
+
+         TEXT
+       end
+    end
+
+    body do
+
+      div id: 'cam' do
+        iframe id: "camframe", src: "http://192.168.1.5/webcam2/?action=stream", width: "1280", height: "720" do end
+      end
+
+      div id: 'cam2' do
+        iframe id: "cam2frame", src: "http://192.168.1.5/webcam/?action=stream", width: "1280", height: "720" do end
+      end
+
+      div id: 'toolhead_box', class: 'stat_box' do
+        span 'nozzle', class: 'title_text'
+        br
+        span id: 'tht', class: 'status_text'
+      end
+
+      div id: 'bed_box', class: 'stat_box' do
+        span 'printbed', class: 'title_text'
+        br
+        span id: 'bed', class: 'status_text'
+      end
+
+      div id: 'ebb_box', class: 'stat_box' do
+        span 'ebb42', class: 'title_text'
+        br
+        span id: 'ebb', class: 'status_text'
+      end
+
+      div id: 'air_box', class: 'stat_box' do
+        span 'extruder motor', class: 'title_text'
+        br
+        span id: 'air', class: 'status_text'
+      end
+
+      div id: 'xgt_box', class: 'stat_box' do
+        span 'chamber', class: 'title_text'
+        br
+        span id: 'xgt', class: 'status_text'
+      end
+
+      div id: 'fan_box', class: 'stat_box' do
+        span 'part-cooler', class: 'title_text'
+        br
+        span id: 'fan', class: 'status_text'
+      end
+
+      div id: 'progress_bg' do
+
+      end
+
+      div id: 'progress_fg' do
+        
+      end
+
+      div id: 'progress_text' do
+        span id: 'progtext'
+      end
+
+      div id: 'layer_text' do
+        span id: 'layer_txt', class: 'layer_text_style'
+      end
+
+
+      script do
+        text <<~SCRIPT
+
+const intervalid = setInterval(mainloop, 500);
+
+async function mainloop()
+{
+  var url = "/info"
+
+  var a = await fetch(url);
+  var tht = document.getElementById("tht");
+  var tbx = document.getElementById("toolhead_box");
+
+  var bed = document.getElementById("bed");
+  var bbx = document.getElementById("bed_box");
+
+  var ebb = document.getElementById("ebb");
+  var air = document.getElementById("air");
+  var xgt = document.getElementById("xgt");
+
+  var progtext = document.getElementById("progtext");
+  var proggbar = document.getElementById("progress_fg");
+
+  var data = await a.json();
+
+  tht.innerHTML = data.result.status.extruder.temperature + "°C"
+  var tpowerlevel = data.result.status.extruder.power * 255;
+  tbx.style.backgroundColor = 'rgba(' + tpowerlevel + ',0,0,0.8)';
+
+  bed.innerHTML = data.result.status.heater_bed.temperature + "°C"
+  var bpowerlevel = data.result.status.heater_bed.power * 255;
+  bbx.style.backgroundColor = 'rgba(' + bpowerlevel + ',0,0,0.8)';
+
+
+  var cam = document.getElementById("cam");
+  var camframe = document.getElementById("camframe");
+
+  var cam2 = document.getElementById("cam2");
+  var cam2frame = document.getElementById("cam2frame");
+
+
+  ebb.innerHTML = data.result.status["temperature_sensor EBB42"].temperature + "°C"
+  air.innerHTML = data.result.status["temperature_sensor extruder_motor"].temperature + "°C"
+  xgt.innerHTML = data.result.status["temperature_sensor reartopleft_air"].temperature + "°C"
+  fan.innerHTML = (data.result.status["fan"].speed * 100).toString().split('.')[0] + "%";
+
+  if (
+        (data.result.status.print_stats.info.total_layer !== null) &&
+        (
+          data.result.status.print_stats.state === "printing" ||
+          data.result.status.print_stats.state === "paused"
+        )
+    ) {
+    layer_text.style.display = "block";
+    layer_txt.innerHTML = "Layer " + data.result.status.print_stats.info.current_layer + "/" + data.result.status.print_stats.info.total_layer;
+  }
+  else {
+    layer_text.style.display = "none";
+  }
+
+
+  if ((data.result.status.print_stats.info.current_layer + 0) > 3) {
+    cam2.style.display = "none";
+  }
+  else {
+    cam2.style.display = "block";
+  }
+
+
+  var fraction = data.result.status.display_status.progress * 1;
+  var percentage = (fraction * 100).toString().split('.')[0] + "%";
+
+  if (data.result.status.idle_timeout.state == "Idle") {
+    proggbar.style.backgroundColor = 'rgba(128,128,128,0.5)';
+    proggbar.style.width = '1246px'
+    progtext.innerHTML = "IDLE";
+  }
+  else if (data.result.status.display_status.message == "QGL") {
+    proggbar.style.backgroundColor = 'rgba(0,0,255,0.5)';
+    proggbar.style.width = '1246px'
+    progtext.innerHTML = "QUAD GANTRY LEVELLING";
+  }
+  else if (data.result.status.display_status.message == "BEDMESH") {
+    proggbar.style.backgroundColor = 'rgba(255,255,0,0.5)';
+    proggbar.style.width = '1246px'
+    progtext.innerHTML = "PERFORMING BED MESH";
+  }
+  else if (data.result.status.display_status.message == "HEATUP") {
+    proggbar.style.backgroundColor = 'rgba(255,255,0,0.5)';
+    proggbar.style.width = '1246px'
+    progtext.innerHTML = "HEATING UP";
+  }
+  else if (data.result.status.display_status.message == "PREPRINT") {
+    proggbar.style.backgroundColor = 'rgba(255,255,0,0.5)';
+    proggbar.style.width = '1246px'
+    progtext.innerHTML = "PREPARING TO START";
+  }
+  else if (data.result.status.display_status.message == "PURGE") {
+    proggbar.style.backgroundColor = 'rgba(255,255,0,0.5)';
+    proggbar.style.width = '1246px'
+    progtext.innerHTML = "VORON PURGE";
+  }
+  else if(data.result.status.display_status.message == "FINISHED")
+  {
+    proggbar.style.backgroundColor = 'rgba(0,255,0,0.5)';
+    proggbar.style.width = '1246px'
+    progtext.innerHTML = "COMPLETE";
+  }
+  else if(data.result.status.print_stats.state == "printing")
+  {
+    proggbar.style.backgroundColor = 'rgba(0,200,200,0.5)';
+    proggbar.style.width = Math.floor(1246 * fraction).toString().split('.')[0] + 'px';
+    progtext.innerHTML = percentage;
+  }
+  else if(data.result.status.print_stats.state == "paused")
+  {
+    proggbar.style.backgroundColor = 'rgba(255,255,0,0.5)';
+    progtext.innerHTML = "PAUSED";
+  }
+  else if(data.result.status.print_stats.state == "standby")
+  {
+    proggbar.style.backgroundColor = 'rgba(255,255,0,0.0)';
+    progtext.innerHTML = "STANDBY";
+  }
+  else if(data.result.status.print_stats.state == "cancelled")
+  {
+    proggbar.style.backgroundColor = 'rgba(255,0,0,0.5)';
+    progtext.innerHTML = "CANCELLED";
+
+  }
+  else if(data.result.status.print_stats.state == "error")
+  {
+    proggbar.style.backgroundColor = 'rgba(255,0,0,0.5)';
+    progtext.innerHTML = "ERROR";
+
+  }
+  else
+  {
+    proggbar.style.backgroundColor = 'rgba(255,255,0,0.0)';
+    progtext.innerHTML = "STANDBY";
+  }
+
+}
+
+        SCRIPT
+      end
+    
+    end
+  end
+
+end
+
+raw_page 'seccam1', 'seccam1' do
+
+  html do
+    head do
+      link rel:"stylesheet", href:"https://fonts.googleapis.com/css?family=Play"
+
+      style do
+
+        text <<~TEXT
+          body { background: #002; color: #fff; margin:0px; }
+
+           #cam {
+             position: absolute;
+             left: 0px;
+             top: 0px;
+             width:1280px;
+             height:720px;
+             overflow: hidden;
+           }
+
+           #camframe {
+             position: absolute;
+             left: 0px;
+             top: 0px;
+             width:1280px;
+             height:720px;
+             overflow: hidden;
+             border: 0px;
+           }
+
+           #date {
+             position: absolute;
+             bottom: 0px;
+             right: 0px;
+             border: 0px;
+             font-size: 40px;
+             font-family: 'Play';
+             background: rgb(0,0,0,0.5);
+             padding: 5px;
+           }1
+
+        TEXT
+      end
+    end
+
+    body do
+      div id: 'cam' do
+        iframe id: "camframe", src: "http://192.168.1.10:8080/stream", width: "1280", height: "720" do end
+      end
+
+      div id: 'date' do
+        span "haha", id:"datetime"
+      end
+
+
+      script do
+        text <<~SCRIPT
+
+          const intervalid = setInterval(mainloop, 500);
+          var cam = document.getElementById("cam");
+          var camframe = document.getElementById("camframe");
+          var datetime = document.getElementById("datetime");
+
+          var count = 0;
+          async function mainloop()
+          {
+            if (count % 100 == 0) {
+              camframe.src = "http://192.168.1.10:8080/stream";
+            }
+
+            let date = new Date(Date.now()), options = {weekday: 'short', month: 'short', day: 'numeric' };
+            datetime.innerHTML= (date.toLocaleTimeString('en-US', options));
+
+
+
+            count += 1;
+          }
+        SCRIPT
+      end
+    end
+  end
+end
+
+raw_page 'test', 'things' do
+  text '{"meow":"meow"}'
+end
+
+raw_page 'info', '' do
+  res = Net::HTTP.get(URI.parse('http://192.168.1.5:7125/printer/objects/query?gcode_move&toolhead&heater_bed&extruder&temperature_sensor+EBB42&display_status&print_stats&idle_timeout&temperature_sensor+toolhead_air&temperature_sensor+reartopleft_air&fan&temperature_sensor+extruder_motor'))
+
+  text res
+end
